@@ -1,4 +1,4 @@
-// bubble-renderer.js — Telegram 2026 FULL Bubble Renderer with Joiner & Realism Integration
+// bubble-renderer.js — Telegram 2026 FULL Bubble Renderer + Joiner Simulator Integration
 (function(){
   'use strict';
 
@@ -92,7 +92,6 @@
         content.style.color = '#fff';
       }
 
-      // Reply preview jumper
       if(replyToText || replyToId){
         const rp = document.createElement('div');
         rp.className = 'tg-reply-preview';
@@ -133,7 +132,6 @@
       textEl.textContent = text || '';
       content.appendChild(textEl);
 
-      // Broadcast caption & glass admin button
       if(caption){
         const cap = document.createElement('div');
         cap.className = 'tg-bubble-text';
@@ -258,7 +256,7 @@
       }catch(e){}
     });
 
-    // ==== integrate Joiner Simulator ====
+    // ==== Joiner Simulator Integration ====
     if(window.joiner){
       document.addEventListener('joiner:new', (ev)=>{
         const persona = ev.detail;
@@ -291,7 +289,7 @@
       }
     };
 
-    console.log('bubble-renderer fully integrated with interactions & joiner-simulator');
+    console.log('bubble-renderer fully integrated with joiner-simulator & floating pre-gen effects');
   }
 
   document.readyState === 'loading'
