@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Abrox – Profit Hunters Chat</title>
 
-  <!-- widget CSS -->
-  <link rel="stylesheet" href="widget.css" />
+  <!-- Widget CSS -->
+  <link rel="stylesheet" href="widget-fixed.css" />
 
   <script>
-    // Site configuration
+    // SITE CONFIGURATION
     window.CONTACT_ADMIN_LINK = "https://t.me/ph_suppp";
     window.MEMBER_COUNT = 1284;
     window.ONLINE_COUNT = 128;
@@ -36,6 +36,7 @@
 </head>
 <body>
   <div id="tg-comments-app">
+
     <!-- HEADER -->
     <header class="tg-header" role="banner">
       <button id="tg-back" class="tg-back-btn" aria-label="Back">
@@ -61,11 +62,8 @@
     <!-- CHAT CONTAINER -->
     <main id="tg-comments-container" class="tg-comments-container" role="feed" aria-live="off"></main>
 
-    <!-- NEW MESSAGE JUMP INDICATOR -->
-    <div id="tg-jump-indicator" class="hidden" aria-hidden="true">
-      <i data-lucide="chevron-down"></i>
-      <span id="tg-jump-text">New messages</span>
-    </div>
+    <!-- NEW MESSAGE JUMP PILL -->
+    <div id="tg-new-pill" class="hidden" aria-hidden="true">⬇ New Messages</div>
 
     <!-- INPUT BAR -->
     <div class="tg-input-wrapper" role="form" aria-label="Send a message">
@@ -91,75 +89,29 @@
         </button>
       </div>
     </div>
+
   </div>
 
-  <!-- Icons -->
+  <!-- ICONS -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Scripts (load in order) -->
+  <!-- SCRIPTS (order is critical) -->
   <script src="identity-personas.js"></script>
   <script src="bubble-renderer.js"></script>
   <script src="joiner-simulator.js"></script>
-  <script src="realism-engine-v11.js"></script>
+  <script src="realism-engine-v11-full.js"></script>
   <script src="interactions.js"></script>
   <script src="app.js"></script>
 
   <script>
-    // LocalStorage-based chat history
-    const HISTORY_KEY = "abrox_chat_history";
-    const container = document.getElementById("tg-comments-container");
-
-    function loadHistory() {
-      try {
-        const raw = localStorage.getItem(HISTORY_KEY);
-        if (!raw) return;
-        const arr = JSON.parse(raw);
-        if (!Array.isArray(arr)) return;
-
-        arr.forEach(item => {
-          if (window.TGRenderer?.appendMessage) {
-            window.TGRenderer.appendMessage(item.persona, item.text, {
-              type: item.type || "incoming",
-              timestamp: new Date(item.timestamp),
-              replyToText: item.replyToText || null
-            });
-          }
-        });
-      } catch (e) {
-        console.warn("Failed to load history", e);
-      }
-    }
-
-    function saveHistory(persona, text, opts = {}) {
-      try {
-        const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-        history.push({
-          persona,
-          text,
-          type: opts.type || "incoming",
-          timestamp: opts.timestamp || new Date(),
-          replyToText: opts.replyToText || null
-        });
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-500))); // keep last 500
-      } catch (e) {
-        console.warn("Failed to save history", e);
-      }
-    }
-
-    // Hook TGRenderer append to save automatically
-    if (window.TGRenderer) {
-      const origAppend = window.TGRenderer.appendMessage;
-      window.TGRenderer.appendMessage = function(persona, text, opts = {}) {
-        const id = origAppend(persona, text, opts);
-        saveHistory(persona, text, opts);
-        return id;
-      };
-    }
-
-    // Load previous messages on page load
-    loadHistory();
-
+    // INITIALIZE ICONS
     if(window.lucide?.createIcons){ window.lucide.createIcons(); }
+
+    // LOAD INITIAL MEMBER COUNTERS
+    const metaLine = document.getElementById('tg-meta-line');
+    if(metaLine){
+      metaLine.textContent = `${window.MEMBER_COUNT.toLocaleString()} members, ${window.ONLINE_COUNT.toLocaleString()} online`;
+    }
   </script>
 </body>
 </html>
