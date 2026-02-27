@@ -1,4 +1,4 @@
-// joiner-simulator.js — Telegram 2026 fully compatible & polished v2
+// joiner-simulator.js — Telegram 2026 fully compatible & patched
 (function () {
   const DEFAULTS = {
     minIntervalMs: 1000 * 60 * 60 * 6,
@@ -93,7 +93,6 @@
     const text = randomWelcomeText(joiner);
 
     if (cfg.welcomeAsSystem) {
-      // System-style join message
       const chat = document.getElementById("tg-comments-container");
       if (chat) {
         const el = document.createElement("div");
@@ -103,7 +102,6 @@
         chat.scrollTop = chat.scrollHeight;
       }
     } else {
-      // Regular bubble-style
       if (window.TGRenderer?.showTyping) {
         window.TGRenderer.showTyping(persona, 700 + Math.random() * 500);
       }
@@ -117,7 +115,7 @@
           for (let i = 0; i < replyCount; i++) {
             const personaRE = window.identity?.getRandomPersona?.() || { name: "User", avatar: safeBuildAvatar("User") };
             let baseText = random(WELCOME_TEXT_POOL);
-            if (Math.random() < 0.55) baseText += " " + (window.realismEngineV11EMOJIS ? random(window.realismEngineV11EMOJIS) : "🎉");
+            if (Math.random() < 0.55 && window.realismEngineV11EMOJIS) baseText += " " + random(window.realismEngineV11EMOJIS);
             window.realismEngineV11Pool.push({ text: baseText, timestamp: new Date(), persona: personaRE });
           }
         }
