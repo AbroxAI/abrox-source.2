@@ -1,4 +1,4 @@
-// joiner-simulator.js — Telegram 2026 fully compatible & patched
+// joiner-simulator.js — Telegram 2026 fully compatible & polished
 (function () {
   const DEFAULTS = {
     minIntervalMs: 1000 * 60 * 60 * 6,
@@ -24,6 +24,9 @@
     "Excited to be here 🙌", "Looking forward to contributing 🚀", "Happy to join the group 💡"
   ];
 
+  // -----------------------------
+  // HELPERS
+  // -----------------------------
   function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
   function random(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function safeMeta() { return document.getElementById("tg-meta-line"); }
@@ -92,35 +95,26 @@
     const persona = joiner;
     const text = randomWelcomeText(joiner);
 
-    if (cfg.welcomeAsSystem) {
-      const chat = document.getElementById("tg-comments-container");
-      if (chat) {
-        const el = document.createElement("div");
-        el.className = "tg-system-message";
-        el.textContent = `${persona.name} joined the group`;
-        chat.appendChild(el);
-        chat.scrollTop = chat.scrollHeight;
-      }
-    } else {
-      if (window.TGRenderer?.showTyping) {
-        window.TGRenderer.showTyping(persona, 700 + Math.random() * 500);
-      }
-      setTimeout(() => {
-        if (window.TGRenderer?.appendMessage) {
-          window.TGRenderer.appendMessage(persona, text, { type: "incoming" });
-        }
-
-        if (window.realismEngineV11Pool) {
-          const replyCount = 1 + Math.floor(Math.random() * 3);
-          for (let i = 0; i < replyCount; i++) {
-            const personaRE = window.identity?.getRandomPersona?.() || { name: "User", avatar: safeBuildAvatar("User") };
-            let baseText = random(WELCOME_TEXT_POOL);
-            if (Math.random() < 0.55 && window.realismEngineV11EMOJIS) baseText += " " + random(window.realismEngineV11EMOJIS);
-            window.realismEngineV11Pool.push({ text: baseText, timestamp: new Date(), persona: personaRE });
-          }
-        }
-      }, 700 + Math.random() * 500);
+    if (window.TGRenderer?.showTyping) {
+      window.TGRenderer.showTyping(persona, 700 + Math.random() * 500);
     }
+
+    setTimeout(() => {
+      if (window.TGRenderer?.appendMessage) {
+        window.TGRenderer.appendMessage(persona, text, { type: "incoming" });
+      }
+
+      // feed realism engine
+      if (window.realismEngineV11Pool) {
+        const replyCount = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < replyCount; i++) {
+          const personaRE = window.identity?.getRandomPersona?.() || { name: "User", avatar: safeBuildAvatar("User") };
+          let baseText = random(WELCOME_TEXT_POOL);
+          if (Math.random() < 0.55) baseText += " " + (window.realismEngineV11EMOJIS ? random(window.realismEngineV11EMOJIS) : "🎉");
+          window.realismEngineV11Pool.push({ text: baseText, timestamp: new Date(), persona: personaRE });
+        }
+      }
+    }, 700 + Math.random() * 500);
   }
 
   function createJoinStickerElement(joiners) {
@@ -129,21 +123,17 @@
 
     const cluster = document.createElement("div");
     cluster.className = "join-cluster";
-    cluster.style.position = "relative";
 
     const maxAv = Math.min(cfg.stickerMaxAvatars, joiners.length);
     const shown = joiners.slice(0, maxAv);
 
-    shown.forEach((p, i) => {
+    shown.forEach(p => {
       const a = document.createElement("img");
       a.src = p.avatar || safeBuildAvatar(p.name);
       a.alt = p.name || "user";
       a.className = "join-avatar";
       a.width = cfg.stickerAvatarSize;
       a.height = cfg.stickerAvatarSize;
-      a.style.position = "absolute";
-      a.style.left = `${i * (cfg.stickerAvatarSize - cfg.stickerOverlap)}px`;
-      a.style.zIndex = 100 - i;
       a.onerror = () => { a.src = safeBuildAvatar(p.name); };
       cluster.appendChild(a);
     });
@@ -154,13 +144,9 @@
       more.textContent = `+${joiners.length - shown.length}`;
       more.style.width = cfg.stickerAvatarSize + "px";
       more.style.height = cfg.stickerAvatarSize + "px";
-      more.style.position = "absolute";
-      more.style.left = `${shown.length * (cfg.stickerAvatarSize - cfg.stickerOverlap)}px`;
-      more.style.zIndex = 50;
       cluster.appendChild(more);
     }
 
-    cluster.style.height = cfg.stickerAvatarSize + "px";
     container.appendChild(cluster);
 
     const names = document.createElement("div");
@@ -179,6 +165,7 @@
 
   function postJoinerFlow(joiners) {
     bumpMemberCount(joiners.length || 1);
+
     const chat = document.getElementById("tg-comments-container");
 
     if ((joiners.length || 1) > 2 && chat) {
