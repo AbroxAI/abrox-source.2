@@ -1,4 +1,4 @@
-// app.js — FINAL Telegram 2026 (Pinned + Realism + Joiner Safe + Stability Fix)
+// app.js — FINAL Telegram 2026 (Pinned + Realism + Joiner Safe)
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -10,29 +10,21 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  if (window.__TG_APP_INITIALIZED__) return;
-  window.__TG_APP_INITIALIZED__ = true;
-
   /* =====================================================
      SAFE APPEND WRAPPER
   ===================================================== */
   function appendSafe(persona, text, opts = {}) {
-    if (!window.TGRenderer?.appendMessage) {
-      console.warn("TGRenderer not ready");
-      return null;
+    if (window.TGRenderer?.appendMessage) {
+      return window.TGRenderer.appendMessage(persona, text, opts);
     }
-
-    const id = window.TGRenderer.appendMessage(persona, text, opts);
-
-    return id;
+    console.warn("TGRenderer not ready");
+    return null;
   }
 
   /* =====================================================
      ADMIN BROADCAST (Image + Caption + Glass Button)
   ===================================================== */
   function postAdminBroadcast() {
-
-    if (window.__TG_ADMIN_BROADCASTED__) return window.__TG_ADMIN_BROADCASTED__;
 
     const admin = window.identity?.Admin || {
       name: "Admin",
@@ -60,9 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
       caption
     });
 
-    window.__TG_ADMIN_BROADCASTED__ = { id, caption, image };
-
-    return window.__TG_ADMIN_BROADCASTED__;
+    return { id, caption, image };
   }
 
   /* =====================================================
@@ -89,17 +79,15 @@ document.addEventListener("DOMContentLoaded", () => {
     blueBtn.onclick = (e) => {
       e.stopPropagation();
 
-      if (!pinnedMessageId) return;
+      const el = pinnedMessageId
+        ? document.querySelector(`[data-id="${pinnedMessageId}"]`)
+        : null;
 
-      const el = document.querySelector(`[data-id="${pinnedMessageId}"]`);
-      if (!el) return;
-
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-
-      el.classList.add("tg-highlight");
-      setTimeout(() => {
-        el.classList.remove("tg-highlight");
-      }, 2500);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("tg-highlight");
+        setTimeout(() => el.classList.remove("tg-highlight"), 2600);
+      }
     };
 
     const adminBtn = document.createElement("a");
@@ -133,40 +121,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =====================================================
-     INITIAL PIN FLOW (Waits for Renderer)
+     INITIAL PIN FLOW
   ===================================================== */
-  function initializePinFlow() {
+  const broadcast = postAdminBroadcast();
 
-    if (!window.TGRenderer?.appendMessage) {
-      setTimeout(initializePinFlow, 200);
-      return;
-    }
-
-    const broadcast = postAdminBroadcast();
-
-    setTimeout(() => {
-      postPinNotice();
-      showPinBanner(broadcast.image, broadcast.caption, broadcast.id);
-    }, 1000);
-  }
-
-  initializePinFlow();
+  setTimeout(() => {
+    postPinNotice();
+    showPinBanner(broadcast.image, broadcast.caption, broadcast.id);
+  }, 1200);
 
   /* =====================================================
-     ADMIN AUTO RESPONSE (Safe)
+     ADMIN AUTO RESPONSE (uses sendMessage event)
   ===================================================== */
-  let adminCooldown = false;
-
   document.addEventListener("sendMessage", (ev) => {
-
-    if (adminCooldown) return;
 
     const text = ev.detail?.text?.toLowerCase() || "";
 
     if (text.includes("admin") || text.includes("contact")) {
-
-      adminCooldown = true;
-      setTimeout(() => adminCooldown = false, 5000);
 
       const admin = window.identity?.Admin || {
         name: "Admin",
@@ -181,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
           "Please use the Contact Admin button in the pinned banner above.",
           { timestamp: new Date(), type: "incoming" }
         );
-      }, 1500);
+      }, 1600);
     }
   });
 
@@ -205,11 +176,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =====================================================
-     START REALISM ENGINE (Single Instance)
+     START REALISM ENGINE
   ===================================================== */
-  if (window.realism?.simulateRandomCrowdV11 && !window.__TG_REALISM_STARTED__) {
-    window.__TG_REALISM_STARTED__ = true;
-
+  if (window.realism?.simulateRandomCrowdV11) {
     setTimeout(() => {
       window.realism.simulateRandomCrowdV11();
     }, 800);
@@ -227,6 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
     inputBar.style.borderRadius = "26px";
   }
 
-  console.log("app.js fully stabilized and synced");
+  console.log("app.js fully synced with renderer + interactions + realism");
 
 });
