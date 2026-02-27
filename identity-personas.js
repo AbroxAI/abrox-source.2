@@ -54,17 +54,24 @@
   let MIXED_AVATAR_POOL = [];
   function initializeAvatarPool(){
     MIXED_AVATAR_POOL = [];
+    // pravatar 1–200
     for(let i=1;i<=200;i++) MIXED_AVATAR_POOL.push(`https://i.pravatar.cc/300?img=${i}`);
-    for(let i=1;i<=200;i++){
+    // randomuser 1–200
+    for(let i=1;i<=200;i++){ 
       MIXED_AVATAR_POOL.push(`https://randomuser.me/api/portraits/men/${i}.jpg`);
       MIXED_AVATAR_POOL.push(`https://randomuser.me/api/portraits/women/${i}.jpg`);
     }
+    // picsum seeds (50)
     ["alpha","bravo","charlie","delta","echo","foxtrot","golf","hotel","india","juliet","kilo","lima","mike","november","oscar","papa","quebec","romeo","sierra","tango","uniform","victor","whiskey","xray","yankee","zulu","nova","luna","astra","cosmo","orion","phoenix","vortex","nebula","galaxy","comet","meteor","eclipse","sol","terra","aether","zephyr","aurora","celeste"].forEach(seed=>{
       MIXED_AVATAR_POOL.push(`https://picsum.photos/seed/${seed}/300/300`);
     });
+    // robohash (50)
     for(let i=0;i<50;i++) MIXED_AVATAR_POOL.push(`https://robohash.org/seed_${i}.png`);
+    // multiavatar (50)
     for(let i=0;i<50;i++) MIXED_AVATAR_POOL.push(`https://api.multiavatar.com/seed${i}.png`);
+    // ui avatars (200)
     for(let i=0;i<200;i++) MIXED_AVATAR_POOL.push(`https://ui-avatars.com/api/?name=U${i}&background=random&size=256`);
+    // shuffle
     for(let i=MIXED_AVATAR_POOL.length-1;i>0;i--){
       const j=Math.floor(Math.random()*(i+1));
       [MIXED_AVATAR_POOL[i],MIXED_AVATAR_POOL[j]]=[MIXED_AVATAR_POOL[j],MIXED_AVATAR_POOL[i]];
@@ -111,17 +118,20 @@
 
   // ================= UNIQUE AVATAR =================
   function buildUniqueAvatar(name){
+    // pick from existing pool
     let pick=null;
     while(MIXED_AVATAR_POOL.length){
       const idx=Math.floor(Math.random()*MIXED_AVATAR_POOL.length);
       const candidate=MIXED_AVATAR_POOL.splice(idx,1)[0];
       if(!UsedAvatarURLs.has(candidate)){ UsedAvatarURLs.add(candidate); pick=candidate; break; }
     }
+    // dynamic expansion if exhausted
     if(!pick){
       const seed="dyn"+rand(999999);
       const dynamicAvatar=`https://i.pravatar.cc/300?u=${seed}`;
       if(!UsedAvatarURLs.has(dynamicAvatar)){ UsedAvatarURLs.add(dynamicAvatar); pick=dynamicAvatar; }
     }
+    // fallback
     if(!pick){
       const style=random(AVATAR_SOURCES).style||"pixel-art";
       const seed=name?("h"+hash32(name).toString(36)+"_"+rand(99999)):"u"+rand(999999);
